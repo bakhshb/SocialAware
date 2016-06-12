@@ -192,7 +192,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # auth and allauth settings
 LOGIN_REDIRECT_URL = '/accounts/social/connections/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login'
-ACCOUNT_FORMS ={'login': 'facebookapi.forms.NewWorkOrder'}
 SOCIALACCOUNT_QUERY_EMAIL = True
 ACCOUNT_CONFIRM_EMAIL_ON_GET =True
 ACCOUNT_EMAIL_VERIFICATION = 'optional'

@@ -27,15 +27,15 @@ class FacebookSDK (APIView):
 			social_access_token = SocialToken.objects.get(account__user=user, account__provider='facebook')
 			if social_access_token != None:
 				graph = facebook.GraphAPI(access_token= social_access_token, version='2.2')
-				post = graph.get_object(id='me')
-				friends = graph.get_connections(id='me', connection_name='friends')
-				return Response (post)
+				post = graph.get_object(id='me', connection_name='pokes')
+				friends = graph.get_connections(id='me', connection_name='invitable_friends')
+				general = graph.get_connections(id='me', connection_name='friends')
+				return Response (general)
 		return Response (status=status.HTTP_401_UNAUTHORIZED)
 
 
 
 class FacePy (APIView):
-	renderer_classes = (TemplateHTMLRenderer,)
 	def get(self, request, format=None):
 		
 		if request.user.is_authenticated():
@@ -44,10 +44,9 @@ class FacePy (APIView):
 			if social_access_token != None:
 				graph = GraphAPI(social_access_token)
 				# Get my latest posts
-				post= graph.get('me')
+				post= graph.get('me/invitable_friends')
 				return Response (post)
-		data = {'user':'baraa'}
-		return Response (data, template_name='index.html')
+		return Response (status=status.HTTP_401_UNAUTHORIZED)
 
 class URLLib (APIView):
 
