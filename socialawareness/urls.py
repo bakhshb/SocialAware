@@ -24,10 +24,13 @@ from facebookapi.views import FacebookSDK, FacePy, URLLib
 
 
 urlpatterns = [
+    url(r'^admin/', admin.site.urls),
 	url(r'^accounts/', include('allauth.urls')),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 	url(r'^api/ontology', OwlReadyOntology.as_view()),
 	url(r'^api/facebook', FacebookSDK.as_view()),
 	url(r'^api/facepy', FacePy.as_view()),
 	url(r'^api/urllib', URLLib.as_view()),
-    url(r'^admin/', admin.site.urls),
+    
+    
 ]
