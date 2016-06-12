@@ -134,6 +134,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
+#Loggin Errors
 
 LOGGING = {
     'version': 1,
@@ -179,8 +180,21 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'facebookapi': {
+            'handlers': ['console', 'logfile'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     }
 }
+
+#Django rest framework setting
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+}
+
 
 AUTHENTICATION_BACKENDS = (
     # Default backend 
@@ -188,6 +202,7 @@ AUTHENTICATION_BACKENDS = (
     # `allauth` specific authentication methods, such as login by e-mail
     "allauth.account.auth_backends.AuthenticationBackend",
 )
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' 
 # auth and allauth settings
 LOGIN_REDIRECT_URL = '/accounts/social/connections/'
