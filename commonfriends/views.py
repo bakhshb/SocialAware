@@ -3,6 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
 import logging
 from socialawareness.settings import BASE_DIR
 from owlready import *
@@ -19,7 +20,7 @@ class NonVegetarianPizza (onto.Pizza):
 
 
 class OwlReadyOntology (APIView):
-	
+	permission_classes = (AllowAny,)
 
 	def get (self, request, format=None):
 		test_pizza = onto.Pizza("test_pizza_owl_identifier")
