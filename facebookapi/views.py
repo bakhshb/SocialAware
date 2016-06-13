@@ -16,7 +16,12 @@ from facepy import GraphAPI
 #urllib
 import urllib
 import json
-from allauth.socialaccount.models import SocialToken, SocialApp
+from allauth.socialaccount import providers
+from allauth.socialaccount.models import SocialToken, SocialApp, SocialLogin
+from allauth.socialaccount.providers.facebook.views import fb_complete_login
+from allauth.socialaccount.helpers import complete_social_login
+from .serializers import EverybodyCanAuthentication
+from rest_framework.parsers import JSONParser
 
 
 logger = logging.getLogger(__name__)
@@ -29,6 +34,7 @@ class FacebookSDK (APIView):
 		# Make Sure User Logged in With Social Account
 		try:
 			social_access_token = SocialToken.objects.get(account__user=user, account__provider='facebook')
+			print (social_access_token)
 		except ObjectDoesNotExist:
 			content = {'detail':'Authentication with social account required'}
 			return Response(content, status=status.HTTP_428_PRECONDITION_REQUIRED)
@@ -113,3 +119,41 @@ class URLLib (APIView):
 			post_id ['message'].append({'message': post['message']})
 
 		return Response (post_id ['message'])
+
+# API to allow mobile to login
+# curl --dump-header - -H "Content-Type: application/json" -X POST --data '{"access_token":"xxxxxxxx"}' http://localhost:8000/rest/facebook-login/
+
+class RestFacebookLogin (APIView):
+	permission_classes = (AllowAny,)
+	authentication_classes = (EverybodyCanAuthentication,)
+
+	def dispatch(self, *args, **kwargs):
+		return super(RestFacebookLogin, self).dispatch(*args, **kwargs)
+	def post (self,request):
+		
+		original_request = request._request
+		data = JSONParser().parse(request)
+		access_token = data.get('access_token', '')
+		print(access_token)
+		try:
+			app = SocialApp.objects.get(provider='facebook')
+			fb_auth_token = SocialToken(app=app, token=access_token)
+
+			login = fb_complete_login(original_request, app, fb_auth_token)
+			login.token = fb_auth_token
+			login.state = SocialLogin.state_from_request(original_request)
+
+			complete_social_login(original_request, login)
+
+			data_response ={
+			'username': original_request.user.username,
+			'objectId': original_request.user.pk,
+			'firstName': original_request.user.first_name,
+			'lastName': original_request.user.last_name,
+			'email': original_request.user.email,
+			}
+			return Response(status=200, data=data_response)
+		except:
+			return Response(status=401,data={
+				'detail': 'Bad Access Token',
+				})
