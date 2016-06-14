@@ -20,12 +20,15 @@ from allauth.socialaccount import providers
 from allauth.socialaccount.models import SocialToken, SocialApp, SocialLogin
 from allauth.socialaccount.providers.facebook.views import fb_complete_login
 from allauth.socialaccount.helpers import complete_social_login
+from django.contrib.auth import logout as auth_logout
 from .serializers import EverybodyCanAuthentication
 from rest_framework.parsers import JSONParser
-
+from rest_framework.authtoken.models import Token
 
 logger = logging.getLogger(__name__)
 
+# Using FacebookSDK to obtain data from facebook
+# curl -X GET -H 'Authorization: Token f386ccc6c18ffe7863cd705340c3f138967033f3' http://localhost:8000/api/facebook/
 class FacebookSDK (APIView):
 	permission_classes = (IsAuthenticated,)
 
@@ -58,10 +61,10 @@ class FacebookSDK (APIView):
 			        # loop and end the script.
 					break
 
-			return Response (allfriends)
+			return Response (status=status.HTTP_200_OK, data = allfriends)
 
-
-
+# Using Facepy fto obtain data from facebook
+# curl -X GET -H 'Authorization: Token f386ccc6c18ffe7863cd705340c3f138967033f3' http://localhost:8000/api/facepy/
 class FacePy (APIView):
 	permission_classes = (IsAuthenticated,)
 
@@ -91,9 +94,10 @@ class FacePy (APIView):
 			        # When there are no more pages (['paging']['next']), break from the
 			        # loop and end the script.
 			        break
-			return Response (allfriends)				
+			return Response (status=status.HTTP_200_OK, data= allfriends)				
 
-
+# Using URLLIB to obtain public data from facebook
+# curl -X GET -H 'Authorization: Token f386ccc6c18ffe7863cd705340c3f138967033f3' http://localhost:8000/api/urllib/
 class URLLib (APIView):
 	permission_classes = (AllowAny,)
 	def get(self, request, format=None):
@@ -118,11 +122,14 @@ class URLLib (APIView):
 		for post in json_fbposts:
 			post_id ['message'].append({'message': post['message']})
 
-		return Response (post_id ['message'])
+		return Response (status=status.HTTP_200_OK, post= post_id ['message'])
 
 # API to allow mobile to login
+# Example to request login
 # curl --dump-header - -H "Content-Type: application/json" -X POST --data '{"access_token":"xxxxxxxx"}' http://localhost:8000/rest/facebook-login/
-
+# Actual Login
+# curl --dump-header - -H "Content-Type: application/json" -X POST --data '{"access_token":"EAAOYwyCLF9oBABpLTdOTkZAvQPsHeFRJ4LCdIkrBXAJz1ZAWljjb67NRFeGc2ZC7BVn3QZCEGTaL7wM0RCM8HNdrjZArdMzkla726svHHFMOJceQoutCRJBnXfnZAkUAPjtltq9KDsr3IWXrhBW99xg1PlqjL3ZBONvhVfjdNhZAqjtLDuvAH0ZC6KI57wR7buM8JzqSU394ZAaoijoyAogwpnFHr0H7zSWNdCSlfUS2WRovjVEBdYHjwVlunylLlO05ZB5jZCkJgsci4wZDZD"}' http://localhost:8000/api/login/facebook/
+# Path /api/auth/facebook
 class RestFacebookLogin (APIView):
 	permission_classes = (AllowAny,)
 	authentication_classes = (EverybodyCanAuthentication,)
@@ -144,6 +151,7 @@ class RestFacebookLogin (APIView):
 			login.state = SocialLogin.state_from_request(original_request)
 
 			complete_social_login(original_request, login)
+			token, _ = Token.objects.get_or_create(user=original_request.user)
 
 			data_response ={
 			'username': original_request.user.username,
@@ -151,9 +159,28 @@ class RestFacebookLogin (APIView):
 			'firstName': original_request.user.first_name,
 			'lastName': original_request.user.last_name,
 			'email': original_request.user.email,
+			'sessionToken': token.key,
 			}
-			return Response(status=200, data=data_response)
+			return Response(status=status.HTTP_200_OK, data=data_response)
 		except:
-			return Response(status=401,data={
+			return Response(status=status.HTTP_401_UNAUTHORIZED,data={
 				'detail': 'Bad Access Token',
 				})
+
+# API to allow mobile app to logout 
+# Example for the request 
+# curl -X POST -H 'Authorization: Token Xyour token goes hereX' http://localhost:8000/api/logout/facebook/
+#Actual Example
+# curl -X POST -H 'Authorization: Token f386ccc6c18ffe7863cd705340c3f138967033f3' http://localhost:8000/api/logout/facebook/
+class RestFacebookLogout (APIView):
+	def dispatch(self, *args, **kwargs):
+		return super(RestFacebookLogout, self).dispatch(*args, **kwargs)
+	def post(self, request):
+		original_request = request._request
+		if original_request.user.is_authenticated():
+			print (original_request.user.is_authenticated())
+			print (request.user.username);
+			auth_logout(original_request)
+			print(auth_logout(original_request))
+			request.user.auth_token.delete()
+		return Response (status=status.HTTP_200_OK)

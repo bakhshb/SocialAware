@@ -17,7 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from rest_framework import routers
 from commonfriends.views import OwlReadyOntology
-from facebookapi.views import FacebookSDK, FacePy, URLLib, RestFacebookLogin
+from facebookapi.views import FacebookSDK, FacePy, URLLib, RestFacebookLogin, RestFacebookLogout
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -31,7 +31,7 @@ urlpatterns = [
 	url(r'^api/facebook', FacebookSDK.as_view()),
 	url(r'^api/facepy', FacePy.as_view()),
 	url(r'^api/urllib', URLLib.as_view()),
-    url(r'^api/auth/facebook/$', csrf_exempt(RestFacebookLogin.as_view()), name='rest-facebook-login'),
-    
+    url(r'^api/login/facebook/$', csrf_exempt(RestFacebookLogin.as_view()), name='rest-facebook-login'),
+    url(r'^api/logout/facebook/$', csrf_exempt(RestFacebookLogout.as_view()), name='rest-facebook-logout'),
     
 ]
