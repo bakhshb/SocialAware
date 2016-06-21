@@ -4,36 +4,40 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework.parsers import JSONParser
+from rest_framework.authtoken.models import Token
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth import logout as auth_logout
 import logging
-#facebook sdk
+# Facebook sdk
 import facebook
 import requests
-#facepy 
+# Facepy 
 from facepy import GraphAPI
-#urllib
+# Urllib
 import urllib
 import json
+# Allauth
 from allauth.socialaccount import providers
 from allauth.socialaccount.models import SocialToken, SocialApp, SocialLogin
 from allauth.socialaccount.providers.facebook.views import fb_complete_login
 from allauth.socialaccount.helpers import complete_social_login
-from django.contrib.auth import logout as auth_logout
+# Custome method
 from .serializers import EverybodyCanAuthentication
-from rest_framework.parsers import JSONParser
-from rest_framework.authtoken.models import Token
+
 
 logger = logging.getLogger(__name__)
 
 # Using FacebookSDK to obtain data from facebook
-# curl -X GET -H 'Authorization: Token f386ccc6c18ffe7863cd705340c3f138967033f3' http://localhost:8000/api/facebook/
+# curl -X GET -H 'Authorization: Token eabd231d84b18a4f2d05a1ac558f7f266db5aced' http://localhost:8000/api/facebook/
 class FacebookSDK (APIView):
 	permission_classes = (IsAuthenticated,)
-
 	def get(self, request, format=None):
-		user = request.user
+		original_request = request._request
+
+		user = original_request.user
 		# Make Sure User Logged in With Social Account
 		try:
 			social_access_token = SocialToken.objects.get(account__user=user, account__provider='facebook')
