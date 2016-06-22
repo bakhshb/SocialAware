@@ -140,7 +140,7 @@ STATICFILES_DIRS = [
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
         'standard': {
             'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
@@ -180,12 +180,10 @@ LOGGING = {
         'commonfriends': {
             'handlers': ['console', 'logfile'],
             'level': 'DEBUG',
-            'propagate': True,
         },
         'facebookapi': {
-            'handlers': ['console', 'logfile'],
+            'handlers': ['console','logfile'],
             'level': 'DEBUG',
-            'propagate': True,
         },
     }
 }
