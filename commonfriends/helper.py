@@ -20,15 +20,14 @@ ONTO = Ontology(ONTOLOGY_NAME).load()
 
 
 # Persing the ontology data
-def onto_parsing (args):
-	data = str(args).replace("['",'').replace("']",'')
-	return data
+parsing_to_str = lambda args: str(args).replace("['",'').replace("']",'') 
+remove_space = lambda args: str(args).replace(" ", "_") 
 
 
 # Create instance of friend class for ontology
 def create_friend (**kwargs):
 	print("Calling Friendlist Method")
-	friendList = ONTO.Friend(kwargs['name'].replace(" ","_"))
+	friendList = ONTO.Friend(remove_space(kwargs['name']))
 	friendList.has_name.append(kwargs['name'])
 	friendList.has_id.append(kwargs['id'])
 	friendList.has_picture.append(kwargs['url'])
@@ -37,7 +36,7 @@ def create_friend (**kwargs):
 # Create instance of user class for ontology
 def create_user (**kwargs):
 	print("Calling Create User Method")
-	user = ONTO.User(kwargs['user'].replace(" ","_"))
+	user = ONTO.User(remove_space(kwargs['user']))
 	user.has_name.append(kwargs['name'])
 	user.has_id.append(kwargs['id'])
 	user.has_gender= [kwargs['gender']]

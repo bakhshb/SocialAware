@@ -7,7 +7,7 @@ from django.dispatch import receiver
 # allauth
 from allauth.account.signals import user_logged_in, user_signed_up
 import logging
-from .helper import ONTO, onto_parsing, create_friend, create_user, get_user_data, get_facebook_data 
+from .helper import ONTO, parsing_to_str, remove_space, create_friend, create_user, get_user_data, get_facebook_data 
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ def user_signed_up(request, user, sociallogin=False, **kwargs):
 
 			logger.info("get user details")
 			fb_user = get_user_data(user=user)
-			onto_user = create_user(user= str(user.get_full_name()),
+			onto_user = create_user(user= user.get_full_name(),
 				name=fb_user['name'],
 				id=fb_user['id'],
 				gender=fb_user['gender'],
@@ -53,9 +53,9 @@ def user_logged_in(request, user, sociallogin=None, **kwargs):
 
 		logger.info("Getting the data from ontology")
 		for onto_user in ONTO.User.instances():
-			if str(onto_user) == str(user.get_full_name()).replace(" ","_"):
+			if str(onto_user) == remove_space(user.get_full_name()):
 				for onto_friend in onto_user.has_friend:
-					onto_friendlist.append(onto_parsing(onto_friend.has_name))
+					onto_friendlist.append(parsing_to_str(onto_friend.has_name))
 
 		logger.info("Checking if user has a new friend")
 		save_to_ontology = False

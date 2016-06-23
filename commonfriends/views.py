@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.core.exceptions import ObjectDoesNotExist
 import logging
-from .helper import ONTO
+from .helper import ONTO, parsing_to_str, remove_space
 
 logger = logging.getLogger(__name__)
 
@@ -20,136 +20,15 @@ class OwlReadyOntology (APIView):
 		user = request.user
 		onto_friendlist=[]
 		for onto_user in ONTO.User.instances():
-			if str(onto_user) == str(user.get_full_name()).replace(" ","_"):
+			if str(onto_user) == remove_space(user.get_full_name()):
 				
-				onto_friendlist.append(dict(user_id=onto_user.has_id,
-					name=onto_user.has_name,
-					gender=onto_user.has_gender,
-					picture=onto_user.has_picture))
+				onto_friendlist.append(dict(user_id=parsing_to_str(onto_user.has_id),
+					name=parsing_to_str(onto_user.has_name),
+					gender=parsing_to_str(onto_user.has_gender),
+					picture=parsing_to_str(onto_user.has_picture)))
 
 				for onto_friend in onto_user.has_friend:
-					onto_friendlist.append(dict(friend=self.onto_parsing(onto_friend.has_name),
-						picture=onto_friend.has_picture))
+					onto_friendlist.append(dict(friend=parsing_to_str(onto_friend.has_name),
+						picture=parsing_to_str(onto_friend.has_picture)))
 			
 			return Response (status=status.HTTP_200_OK, data= onto_friendlist)
-
-	# 	user = request.user
-	# 	if not ONTO.instances:
-	# 		logger.info("Filling the ontology with Facebook data for the first time loggin")
-
-	# 		fb_user = self.get_user_data(user=user)
-	# 		onto_user = self.create_user(user= str(user.get_full_name()),
-	# 			name=fb_user['name'],
-	# 			id=fb_user['id'],
-	# 			gender=fb_user['gender'],
-	# 			url=fb_user['picture']['data']['url'])
-	# 		fb_friendlist = self.get_facebook_data(user)
-
-	# 		if not fb_friendlist:
-	# 			content = {'detail':'Authentication with social account required'}
-	# 			return Response(content, status=status.HTTP_428_PRECONDITION_REQUIRED)
-
-	# 		for friend in fb_friendlist:
-	# 			onto_user.has_friend.append(self.create_friend(name=friend['name'], 
-	# 				id=friend['id'], url=friend['url']))
-
-	# 		logger.info("Save to ontology")
-	# 		ONTO.save('facebook.owl')
-
-	# 		return Response (status=status.HTTP_200_OK, data= fb_friendlist)
-	# 	else:
-	# 		# This data from ontology
-	# 		logger.info("Getting data from facebook")
-	# 		fb_friendlist = self.get_facebook_data(user)
-	# 		onto_friendlist=[]
-			
-	# 		if not fb_friendlist:
-	# 			content = {'detail':'Authentication with social account required'}
-	# 			return Response(content, status=status.HTTP_428_PRECONDITION_REQUIRED)
-
-	# 		logger.info("Getting the data from ontology")
-	# 		for onto_user in ONTO.User.instances():
-	# 			if str(onto_user) == str(user.get_full_name()).replace(" ","_"):
-					
-	# 				for onto_friend in onto_user.has_friend:
-	# 					onto_friendlist.append(self.onto_parsing(onto_friend.has_name))
-
-	# 			logger.info("Checking if user has a new friend")
-	# 			save_to_ontology = False
-	# 			for friend in fb_friendlist:
-	# 				if not friend['name'] in onto_friendlist:
-	# 					print("Add a new friend")
-	# 					save_to_ontology=True
-	# 					onto_user.has_friend.append(self.create_friend(name=friend['name'],id=friend['id'], url=friend['url']))
-	# 				else:
-	# 					print("No new friend found")
-
-
-	# 			if save_to_ontology:
-	# 				logger.info("Save to ontology")
-	# 				ONTO.save('facebook.owl')					
-	# 		return Response(status=status.HTTP_200_OK, data= onto_friendlist)
-				
-
-	# def create_friend (self, **kwargs):
-	# 	friendList = ONTO.Friend(kwargs['name'].replace(" ","_"))
-	# 	friendList.has_name.append(kwargs['name'])
-	# 	friendList.has_id.append(kwargs['id'])
-	# 	friendList.has_picture.append(kwargs['url'])
-	# 	return friendList
-
-	# def create_user (self, **kwargs):
-	# 	user = ONTO.User(kwargs['user'].replace(" ","_"))
-	# 	user.has_name.append(kwargs['name'])
-	# 	user.has_id.append(kwargs['id'])
-	# 	user.has_gender= [kwargs['gender']]
-	# 	user.has_picture.append(kwargs['url'])
-	# 	return user
-
-	# def get_facebook_data (self,user):
-	# 	allfriends = []
-	# 	try:
-	# 		social_access_token = SocialToken.objects.get(account__user=user, account__provider='facebook')
-	# 	except ObjectDoesNotExist:
-	# 		logger.error("Authentication with social account required")
-	# 		return allfriends
-
-	# 	if social_access_token != None:
-	# 		graph = GraphAPI(social_access_token)
-	# 		# Get Frineds
-	# 		friends= graph.get('me/invitable_friends')
-	# 		# Wrap this block in a while loop so we can keep paginating requests until
-	# 		# finished.
-	# 		while(True):
-	# 		    try:
-	# 		        for friend in iter(friends['data']):
-	# 		            allfriends.append(dict(name=friend['name'], 
-	# 		            	id=friend['id'],
-	# 		            	url=friend['picture']['data']['url']))
-	# 		            #print(friend['picture']['data']['url'])
-	# 		        # Attempt to make a request to the next page of data, if it exists.
-	# 		        friends=requests.get(friends['paging']['next']).json()
-	# 		    except KeyError:
-	# 		        # When there are no more pages (['paging']['next']), break from the
-	# 		        # loop and end the script.
-	# 		        break
-	# 		return allfriends
-
-	# def get_user_data(self,**kwargs):
-	# 	user = kwargs['user']
-	# 	try:
-	# 		social_access_token = SocialToken.objects.get(account__user=user, account__provider='facebook')
-	# 	except ObjectDoesNotExist:
-	# 		logger.error("Authentication with social account required")
-	# 	if social_access_token != None:
-	# 		graph = GraphAPI(social_access_token)
-	# 		# Get Frineds
-	# 		me= graph.get('me?fields=id,name,gender,picture')
-	# 		return me
-
-
-
-
-	def onto_parsing (self, args):
-		data = str(args).replace("['",'').replace("']",'')
-		return data
