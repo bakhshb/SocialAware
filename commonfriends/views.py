@@ -7,14 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.core.exceptions import ObjectDoesNotExist
 import logging
-from socialawareness.settings import BASE_DIR
-from owlready import *
-#facepy 
-from facepy import GraphAPI
-import requests
-#allauth
-from allauth.socialaccount.models import SocialToken, SocialApp, SocialLogin
-from .models import onto
+from .helper import ONTO
 
 logger = logging.getLogger(__name__)
 
@@ -26,15 +19,7 @@ class OwlReadyOntology (APIView):
 
 		user = request.user
 		onto_friendlist=[]
-		na = "Moayad_Sameer_Bakhsh"
-		for f in onto.Friend.instances():
-			print (f)
-			if str(na) == str(f):
-				print ("Ifound itjjjjjjjjjjjjjjjjjjjjjjjjjjjj")
-				print (f.is_friend_of)
-			else:
-				print ("not found")
-		for onto_user in onto.User.instances():
+		for onto_user in ONTO.User.instances():
 			if str(onto_user) == str(user.get_full_name()).replace(" ","_"):
 				
 				onto_friendlist.append(dict(user_id=onto_user.has_id,
@@ -49,7 +34,7 @@ class OwlReadyOntology (APIView):
 			return Response (status=status.HTTP_200_OK, data= onto_friendlist)
 
 	# 	user = request.user
-	# 	if not onto.instances:
+	# 	if not ONTO.instances:
 	# 		logger.info("Filling the ontology with Facebook data for the first time loggin")
 
 	# 		fb_user = self.get_user_data(user=user)
@@ -69,7 +54,7 @@ class OwlReadyOntology (APIView):
 	# 				id=friend['id'], url=friend['url']))
 
 	# 		logger.info("Save to ontology")
-	# 		onto.save('facebook.owl')
+	# 		ONTO.save('facebook.owl')
 
 	# 		return Response (status=status.HTTP_200_OK, data= fb_friendlist)
 	# 	else:
@@ -83,7 +68,7 @@ class OwlReadyOntology (APIView):
 	# 			return Response(content, status=status.HTTP_428_PRECONDITION_REQUIRED)
 
 	# 		logger.info("Getting the data from ontology")
-	# 		for onto_user in onto.User.instances():
+	# 		for onto_user in ONTO.User.instances():
 	# 			if str(onto_user) == str(user.get_full_name()).replace(" ","_"):
 					
 	# 				for onto_friend in onto_user.has_friend:
@@ -102,19 +87,19 @@ class OwlReadyOntology (APIView):
 
 	# 			if save_to_ontology:
 	# 				logger.info("Save to ontology")
-	# 				onto.save('facebook.owl')					
+	# 				ONTO.save('facebook.owl')					
 	# 		return Response(status=status.HTTP_200_OK, data= onto_friendlist)
 				
 
 	# def create_friend (self, **kwargs):
-	# 	friendList = onto.Friend(kwargs['name'].replace(" ","_"))
+	# 	friendList = ONTO.Friend(kwargs['name'].replace(" ","_"))
 	# 	friendList.has_name.append(kwargs['name'])
 	# 	friendList.has_id.append(kwargs['id'])
 	# 	friendList.has_picture.append(kwargs['url'])
 	# 	return friendList
 
 	# def create_user (self, **kwargs):
-	# 	user = onto.User(kwargs['user'].replace(" ","_"))
+	# 	user = ONTO.User(kwargs['user'].replace(" ","_"))
 	# 	user.has_name.append(kwargs['name'])
 	# 	user.has_id.append(kwargs['id'])
 	# 	user.has_gender= [kwargs['gender']]
