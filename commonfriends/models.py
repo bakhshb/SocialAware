@@ -52,8 +52,6 @@ def user_logged_in(request, user, sociallogin=None, **kwargs):
 				logger.info("Adding a friend")
 				save_to_ontology=True
 				onto.create_friend(name=friend['name'],id=friend['id'], url=friend['url'])
-			else:
-				logger.info("No New Friend Found")
 			
 		if save_to_ontology:
 			logger.info("updating ontology")
