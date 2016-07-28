@@ -153,7 +153,7 @@ LOGGING = {
             'class':'logging.NullHandler',
         },
         'logfile': {
-            'level':'DEBUG',
+            'level':'ERROR',
             'class':'logging.handlers.RotatingFileHandler',
             'filename': BASE_DIR + "/logfile",
             'maxBytes': 50000,
@@ -161,7 +161,7 @@ LOGGING = {
             'formatter': 'standard',
         },
         'console':{
-            'level':'INFO',
+            'level':'DEBUG',
             'class':'logging.StreamHandler',
             'formatter': 'standard'
         },
@@ -178,7 +178,7 @@ LOGGING = {
             'propagate': False,
         },
         'commonfriends': {
-            'handlers': ['console', 'logfile'],
+            'handlers': ['console','logfile'],
             'level': 'DEBUG',
         },
         'facebookapi': {
