@@ -62,7 +62,6 @@ class FacebookManager (object):
 			            allfriends.append(dict(name=friend['name'], 
 			            	id=friend['id'],
 			            	url=friend['picture']['data']['url']))
-			            #print(friend['picture']['data']['url'])
 			        # Attempt to make a request to the next page of data, if it exists.
 			        friends=requests.get(friends['paging']['next']).json()
 			    except KeyError:
@@ -90,9 +89,8 @@ class OntologyManager (object):
 
 	def get_friends (self):
 		if self.onto_user is not None:
-			onto_user = self.onto_user
 			onto_friendlist=[]
-			for onto_friend in onto_user.has_friend:
+			for onto_friend in self.onto_user.has_friend:
 				onto_friendlist.append(dict(friend=parsing_to_str(onto_friend.has_name),
 					picture=parsing_to_str(onto_friend.has_picture)))
 			return onto_friendlist
@@ -102,9 +100,8 @@ class OntologyManager (object):
 
 	def get_friends_name (self):
 		if self.onto_user is not None:
-			onto_user = self.onto_user
 			onto_friendlist=[]
-			for onto_friend in onto_user.has_friend:
+			for onto_friend in self.onto_user.has_friend:
 				onto_friendlist.append(parsing_to_str(onto_friend.has_name))
 			return onto_friendlist
 		else:
