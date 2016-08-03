@@ -17,7 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from rest_framework import routers
 from django.views.decorators.csrf import csrf_exempt
-from commonfriends.views import RegisterUserBluetooth, FindMutualFriends, OwlReadyOntology
+from commonfriends.views import UserBluetooth, SearchFriendByBluetooth, OwlReadyOntology
 from facebookapi.views import FacePy, RestFacebookLogin, RestFacebookLogout
 
 
@@ -27,8 +27,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
 	url(r'^accounts/', include('allauth.urls')),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^api/post/bluetooth/$', csrf_exempt(RegisterUserBluetooth.as_view())),
-    url(r'^api/find/friends/$', csrf_exempt(FindMutualFriends.as_view())),
+    url(r'^api/bluetooth/user/$', csrf_exempt(UserBluetooth.as_view())),
+    url(r'^api/bluetooth/search/$', csrf_exempt(SearchFriendByBluetooth.as_view())),
 	url(r'^api/ontology/', OwlReadyOntology.as_view()),
 	url(r'^api/facepy/', FacePy.as_view()),
     url(r'^api/login/facebook/$', csrf_exempt(RestFacebookLogin.as_view()), name='rest-facebook-login'),

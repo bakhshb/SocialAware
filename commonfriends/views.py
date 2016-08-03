@@ -15,9 +15,9 @@ import json
 logger = logging.getLogger(__name__)
 
 #send User Bluetooth to save it to ontology
-# curl -X POST  -H "Content-Type: application/json" -H 'Authorization: Token f386ccc6c18ffe7863cd705340c3f138967033f3' -d "{'bluetooth':''}" http://localhost:8000/api/post/bluetooth/
-# Path http://localhost:8000/api/post/bluetooth/
-class RegisterUserBluetooth(APIView):
+# curl -X POST  -H "Content-Type: application/json" -H 'Authorization: Token f386ccc6c18ffe7863cd705340c3f138967033f3' -d "{'bluetooth':''}" http://localhost:8000/api/bluetooth/user/
+# Path http://localhost:8000/api/bluetooth/user/
+class UserBluetooth(APIView):
 	permission_classes = (IsAuthenticated,)
 
 	def dispatch(self, *args, **kwargs):
@@ -37,9 +37,9 @@ class RegisterUserBluetooth(APIView):
 		return Response(status = status.HTTP_200_OK,data={'status':status.HTTP_200_OK })
 
 #receive Bluetooth to check for mutual friends 
-# curl -X POST  -H "Content-Type: application/json" -H 'Authorization: Token f386ccc6c18ffe7863cd705340c3f138967033f3' -d "{'bluetooth':''}" http://localhost:8000/api/find/friends/
-# Path http://localhost:8000/api/find/friends/
-class FindMutualFriends(APIView):
+# curl -X POST  -H "Content-Type: application/json" -H 'Authorization: Token f386ccc6c18ffe7863cd705340c3f138967033f3' -d "{'bluetooth':''}" http://localhost:8000/api/bluetooth/search/
+# Path http://localhost:8000/api/bluetooth/search/
+class SearchFriendByBluetooth(APIView):
 	permission_classes = (IsAuthenticated,)
 
 	def dispatch(self, *args, **kwargs):
