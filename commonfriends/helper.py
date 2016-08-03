@@ -6,7 +6,7 @@ import requests
 # Owlready
 from owlready import *
 # get setting detail
-from socialawareness.settings import BASE_DIR, ONTOLOGY_NAME
+from socialawareness.settings import BASE_DIR, ONTOLOGY_IRI
 import logging
 
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # load ontology
 logger.info("Loading Facebook.owl Ontology")
 onto_path.append (BASE_DIR)
-ONTO = Ontology(ONTOLOGY_NAME).load()
+ONTO = Ontology(ONTOLOGY_IRI).load()
 
 
 # Persing the ontology data
@@ -35,7 +35,10 @@ class FacebookManager (object):
 			try:
 				self.social_access_token = SocialToken.objects.get(account__user=self.user, account__provider='facebook')
 			except ObjectDoesNotExist:
-				logger.error("Authentication with social account required")
+				logger.debug("Authentication with social account required")
+
+	def __repr__(self):
+		return repr(self.social_access_token)
 
 
 	def get_user_token (self):
@@ -76,16 +79,25 @@ class OntologyManager (object):
 	def __init__ (self, user=None):
 		logger.info("Ontology Manager Started")
 		global ONTO
+		global ONTOLOGY_IRI
 		self.onto_user = None
 		if user is not None:
 			self.user = user
-			self.onto_user = ONTO.get_object("http://aut.ac.nz/xgc4811/ontology/facebook.owl#%s"%remove_space (self.user.get_full_name()))
+			try:
+				onto_user_object = ONTO.get_object(ONTOLOGY_IRI+"#%s"%remove_space(self.user.get_full_name()))
+				if onto_user_object in ONTO.User.instances():
+					self.onto_user = onto_user_object
+			except ValueError as ex:
+				logger.debug("The user does not exist in the ontology because authentication with social account required")
+
+	def __repr__(self):
+		return repr(self.onto_user)
 		
 	def get_user (self):
 		if self.onto_user is not None:
 			return self.onto_user
 		else:
-			raise ValueError ("user is not set")
+			raise ValueError ("user has not been created")
 
 	def get_friends (self):
 		if self.onto_user is not None:
@@ -100,23 +112,29 @@ class OntologyManager (object):
 
 	def get_friends_name (self):
 		if self.onto_user is not None:
-			onto_friendlist=[]
-			for onto_friend in self.onto_user.has_friend:
-				onto_friendlist.append(parsing_to_str(onto_friend.has_name))
-			return onto_friendlist
-		else:
-			raise ValueError ("Cannot get friends because user is not found")
+			try:
+				onto_friendlist=[]
+				for onto_friend in self.onto_user.has_friend:
+					onto_friendlist.append(parsing_to_str(onto_friend.has_name))
+				return onto_friendlist
+			except ValueError:
+				logger.debug("Cannot get friends because user is not found")
+		# else:
+		# 	raise ValueError ("Cannot get friends because user is not found")
 			
 
 	def create_user (self, **kwargs):
 		if self.onto_user is None:
-			self.onto_user = ONTO.User(remove_space(kwargs['user']))
-			self.onto_user.has_name.append(kwargs['name'])
-			self.onto_user.has_id.append(kwargs['id'])
-			self.onto_user.has_gender= [kwargs['gender']]
-			self.onto_user.has_picture.append(kwargs['url'])
+			if not remove_space(kwargs['user']) in ONTO.User.instances():
+				self.onto_user = ONTO.User(remove_space(kwargs['user']))
+				self.onto_user.has_name.append(kwargs['name'])
+				self.onto_user.has_id.append(kwargs['id'])
+				self.onto_user.has_gender= [kwargs['gender']]
+				self.onto_user.has_picture.append(kwargs['url'])
+			else:
+				raise ValueError ("User already exists")
 		else:
-			raise ValueError ("Cannot create user because user is already initiated")
+			raise ValueError ("Cannot create user because user already exists")
 
 	def create_friend (self,**kwargs):
 		if self.onto_user is not None:
@@ -131,11 +149,18 @@ class OntologyManager (object):
 	def delete_instances (self,instance):
 		ONTO.instances.remove(instance)
 
-	def create_bluetooth(self, mac_address):
+	def create_bluetooth(self, bluetooth):
 		if self.onto_user is not None:
-			self.onto_user.has_bluetooth.append(mac_address)
+			current_bluetooth = self.onto_user.has_bluetooth
+			if not current_bluetooth:
+				# if there is no bluetooth create bluetooth
+				self.onto_user.has_bluetooth.append(bluetooth)
+			else:
+				# remove current bluetooth, then create new bluetooth
+				self.onto_user.has_bluetooth.remove(parsing_to_str(current_bluetooth))
+				self.onto_user.has_bluetooth.append(bluetooth)
 		else:
-			raise ValueError ("Cannot set bluetooth because user is not found")
+			raise ValueError ("Cannot create bluetooth because user is not found")
 
 	def get_user_by_bluetooth (self, bluetooth):
 		for onto_user in ONTO.User.instances():
