@@ -32,7 +32,7 @@ class RegisterUserBluetooth(APIView):
 		onto_user = onto.get_user()
 		onto.create_bluetooth(bluetooth)
 		logger.debug(onto_user.has_bluetooth)
-		# onto.save_ontology()
+		onto.save_ontology()
 
 		return Response(status = status.HTTP_200_OK,data={'status':status.HTTP_200_OK })
 
