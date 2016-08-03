@@ -21,7 +21,7 @@ class UserBluetooth(APIView):
 	permission_classes = (IsAuthenticated,)
 
 	def dispatch(self, *args, **kwargs):
-		return super(RegisterUserBluetooth, self).dispatch(*args, **kwargs)
+		return super(UserBluetooth, self).dispatch(*args, **kwargs)
 	def post(self, request):
 		logger.info("Register User Bluetooth")
 		data = request.data
@@ -43,7 +43,7 @@ class SearchFriendByBluetooth(APIView):
 	permission_classes = (IsAuthenticated,)
 
 	def dispatch(self, *args, **kwargs):
-		return super(FindMutualFriends, self).dispatch(*args, **kwargs)
+		return super(SearchFriendByBluetooth, self).dispatch(*args, **kwargs)
 	def post(self, request):
 		logger.info("Receiving Surrounding Bluetooth")
 		data = request.data
