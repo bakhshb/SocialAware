@@ -78,6 +78,12 @@ class OwlReadyOntology (APIView):
 		user = request.user
 		onto_friendlist=[]
 		onto= OntologyManager(user)
+		if repr(onto) == 'None':
+			data={
+				'status': status.HTTP_204_NO_CONTENT,
+				'data': 'Authentication with social account required '
+			}
+			return Response(status = status.HTTP_204_NO_CONTENT, data=data)
 		onto_friendlist = onto.get_friends_name()
 
 		return Response (status=status.HTTP_200_OK, data= onto_friendlist)

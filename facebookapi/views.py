@@ -30,6 +30,12 @@ class FacePy (APIView):
 	def get(self, request, format=None):
 		user = request.user
 		fb = FacebookManager(user)
+		if repr(fb) == 'None':
+			data={
+				'status': status.HTTP_204_NO_CONTENT,
+				'data': 'Authentication with social account required '
+			}
+			return Response(status = status.HTTP_204_NO_CONTENT, data=data)
 		allfriends = fb.get_user_friends()
 		return Response (status=status.HTTP_200_OK, data= allfriends)				
 
