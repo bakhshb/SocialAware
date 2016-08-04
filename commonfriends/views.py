@@ -64,8 +64,7 @@ class SearchFriendByBluetooth(APIView):
 		onto_current_user_friends = onto_current.get_friends_name()
 		# Comapring both friend list and finding mutual friends
 		mutual = set(onto_current_user_friends) & set(onto_received_user_friends)
-
-		return Response(status = status.HTTP_200_OK,data=mutual)
+		return Response(status = status.HTTP_200_OK,data={'name': mutual})
 
 
 
