@@ -17,19 +17,19 @@ logger = logging.getLogger(__name__)
 @receiver(user_signed_up)
 def user_signed_up(request, user, sociallogin=False, **kwargs):
 	if sociallogin:
-		if not ONTO.instances:
-			# get user detail from facebook
-			fb = FacebookManager(user)
-			fb_user = fb.get_user_detail()
+		logger.info("Getting user detail from Facebook for signing up")
+		# get user detail from facebook
+		fb = FacebookManager(user)
+		fb_user = fb.get_user_detail()
 
-			logger.info("Signing up new user in ontology")
-			# Create a new user in ontology user
-			# OntologyManager class should have no parameter 
-			onto = OntologyManager()
-			onto.create_user(user= user.get_full_name(),name=fb_user['name'],
-				id=fb_user['id'],
-				gender=fb_user['gender'],
-				url=fb_user['picture']['data']['url'])
+		logger.info("Signing up new user in ontology")
+		# Create a new user in ontology user
+		# OntologyManager class should have no parameter 
+		onto = OntologyManager()
+		onto.create_user(user= user.get_full_name(),name=fb_user['name'],
+			id=fb_user['id'],
+			gender=fb_user['gender'],
+			url=fb_user['picture']['data']['url'])
 
 
 # Listen to loggin and check if facebook friend has been changed
@@ -37,7 +37,7 @@ def user_signed_up(request, user, sociallogin=False, **kwargs):
 def user_logged_in(request, user, sociallogin=None, **kwargs):
 	if sociallogin:
 
-		logger.info("Getting he current user detail from facebook")
+		logger.info("Getting the current user detail from facebook")
 		fb = FacebookManager(user)
 		fb_friendlist = fb.get_user_friends()
 
@@ -49,7 +49,7 @@ def user_logged_in(request, user, sociallogin=None, **kwargs):
 		save_to_ontology = False
 		for friend in fb_friendlist:
 			if not friend['name'] in onto_friendlist:
-				logger.info("Adding a friend")
+				logger.info("Adding new a friend")
 				save_to_ontology=True
 				onto.create_friend(name=friend['name'],id=friend['id'], url=friend['url'])
 			
