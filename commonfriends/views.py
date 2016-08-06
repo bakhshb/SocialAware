@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import JSONParser
 from django.core.exceptions import ObjectDoesNotExist
 import logging
-from .helper import OntologyManager
+from .helper import OntologyManager, parsing_to_str
 import json
 
 
@@ -66,7 +66,7 @@ class SearchFriendByBluetooth(APIView):
 		mutual = set(onto_current_user_friends) & set(onto_received_user_friends)
 		data = {
 		'status':'200',
-		'user': onto_received_user.has_name,
+		'user': parsing_to_str(onto_received_user.has_name),
 		'friend': mutual
 		}
 		return Response(status = status.HTTP_200_OK,data=data)
