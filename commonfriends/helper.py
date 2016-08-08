@@ -55,8 +55,9 @@ class FacebookManager (object):
 		allfriends =[]
 		if self.social_access_token != None:
 			graph = GraphAPI(self.social_access_token)
-			# Get Frineds
-			friends= graph.get('me/invitable_friends')
+			# Get Frineds taggable friends
+			# friends= graph.get('me/invitable_friends')
+			friends= graph.get('me/taggable_friends')
 			# Wrap this block in a while loop so we can keep paginating requests until
 			# finished.
 			while(True):
