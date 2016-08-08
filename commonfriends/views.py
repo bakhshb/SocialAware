@@ -29,7 +29,7 @@ class UserBluetooth(APIView):
 		# Checking if user_bluetooth is submitted
 		if not user_bluetooth:
 			logger.info("User Bluetooth is empty")
-			return Response(status = status.HTTP_204_NO_CONTENT, data={'status': status.HTTP_204_NO_CONTENT})
+			return Response(status = status.HTTP_400_BAD_REQUEST, data={'status': status.HTTP_400_BAD_REQUEST})
 
 		user = request.user
 		onto = OntologyManager(user)
