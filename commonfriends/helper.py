@@ -88,7 +88,7 @@ class OntologyManager (object):
 				onto_user_object = ONTO.get_object(ONTOLOGY_IRI+"#%s"%remove_space(self.user.get_full_name()))
 				if onto_user_object in ONTO.User.instances():
 					self.onto_user = onto_user_object
-			except ValueError as ex:
+			except ValueError:
 				logger.debug("The user does not exist in the ontology because authentication with social account required")
 
 	def __repr__(self):
@@ -113,15 +113,12 @@ class OntologyManager (object):
 
 	def get_friends_name (self):
 		if self.onto_user is not None:
-			try:
-				onto_friendlist=[]
-				for onto_friend in self.onto_user.has_friend:
-					onto_friendlist.append(parsing_to_str(onto_friend.has_name))
-				return onto_friendlist
-			except ValueError:
-				logger.debug("Cannot get friends because user is not found")
-		# else:
-		# 	raise ValueError ("Cannot get friends because user is not found")
+			onto_friendlist=[]
+			for onto_friend in self.onto_user.has_friend:
+				onto_friendlist.append(parsing_to_str(onto_friend.has_name))
+			return onto_friendlist
+		else:
+			raise ValueError ("Cannot get friends because user is not found")
 			
 
 	def create_user (self, **kwargs):
