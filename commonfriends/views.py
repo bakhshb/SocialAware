@@ -27,7 +27,7 @@ class UserBluetooth(APIView):
 		data = request.data
 		user_bluetooth = data.get('user_bluetooth','')
 		# Checking if user_bluetooth is submitted
-		if user_bluetooth == '':
+		if not user_bluetooth:
 			logger.info("User Bluetooth is empty")
 			return Response(status = status.HTTP_204_NO_CONTENT, data={'status': status.HTTP_204_NO_CONTENT})
 
@@ -58,9 +58,9 @@ class SearchFriendByBluetooth(APIView):
 		data = request.data
 		bluetooth = data.get('bluetooth','')
 		# Checking if bluetooth is submitted
-		if bluetooth == '':
+		if not bluetooth:
 			logger.info("Bluetooth is empty")
-			return Response(status = status.HTTP_204_NO_CONTENT, data={'status': status.HTTP_204_NO_CONTENT})
+			return Response(status = status.HTTP_400_BAD_REQUEST, data={'status': status.HTTP_400_BAD_REQUEST})
 
 
 		# Finding the user by bluetooth address in the ontology
