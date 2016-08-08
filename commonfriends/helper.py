@@ -35,7 +35,7 @@ class FacebookManager (object):
 			try:
 				self.social_access_token = SocialToken.objects.get(account__user=self.user, account__provider='facebook')
 			except ObjectDoesNotExist:
-				logger.debug("Authentication with social account required")
+				logger.error("Authentication with social account required")
 
 	def __repr__(self):
 		return repr(self.social_access_token)
@@ -89,7 +89,7 @@ class OntologyManager (object):
 				if onto_user_object in ONTO.User.instances():
 					self.onto_user = onto_user_object
 			except ValueError:
-				logger.debug("The user does not exist in the ontology because authentication with social account required")
+				logger.error("The user does not exist in the ontology because authentication with social account required")
 
 	def __repr__(self):
 		return repr(self.onto_user)
@@ -99,6 +99,7 @@ class OntologyManager (object):
 			return self.onto_user
 		else:
 			raise ValueError ("user has not been created")
+			logger.error("user has not been created")
 
 	def get_friends (self):
 		if self.onto_user is not None:
@@ -109,6 +110,7 @@ class OntologyManager (object):
 			return onto_friendlist
 		else:
 			raise ValueError ("Cannot get friends because user is not found")
+			logger.error("Cannot get friends because user is not found")
 
 
 	def get_friends_name (self):
@@ -119,7 +121,7 @@ class OntologyManager (object):
 			return onto_friendlist
 		else:
 			raise ValueError ("Cannot get friends because user is not found")
-			
+			logger.error("Cannot get friends because user is not found")
 
 	def create_user (self, **kwargs):
 		if self.onto_user is None:
@@ -131,8 +133,10 @@ class OntologyManager (object):
 				self.onto_user.has_picture.append(kwargs['url'])
 			else:
 				raise ValueError ("User already exists")
+				logger.error("User already exists")
 		else:
 			raise ValueError ("Cannot create user because user already exists")
+			logger.error("Cannot create user because user already exists")
 
 	def create_friend (self,**kwargs):
 		if self.onto_user is not None:
@@ -143,6 +147,7 @@ class OntologyManager (object):
 			self.onto_user.has_friend.append(friend)
 		else:
 			raise ValueError ("Cannot create friend because user is not found")
+			logger.error("Cannot create friend because user is not found")
 
 	def delete_instances (self,instance):
 		ONTO.instances.remove(instance)
@@ -159,6 +164,7 @@ class OntologyManager (object):
 				self.onto_user.has_bluetooth.append(bluetooth)
 		else:
 			raise ValueError ("Cannot create bluetooth because user is not found")
+			logger.error("Cannot create bluetooth because user is not found")
 
 	def get_user_by_bluetooth (self, bluetooth):
 		for onto_user in ONTO.User.instances():
