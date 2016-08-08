@@ -33,6 +33,12 @@ class UserBluetooth(APIView):
 
 		user = request.user
 		onto = OntologyManager(user)
+		if repr(onto) == 'None':
+			data={
+				'status': '400',
+				'data': 'Authentication with social account required '
+			}
+			return Response(status = status.HTTP_400_BAD_REQUEST, data=data)
 		onto_user = onto.get_user()
 		onto.create_bluetooth(user_bluetooth)
 		logger.debug(onto_user.has_bluetooth)
@@ -80,6 +86,13 @@ class SearchFriendByBluetooth(APIView):
 		# Getting the current user detail from ontology
 		user = request.user
 		onto_current = OntologyManager(user)
+		# Checking if user is logged in with social account
+		if repr(onto_current) == 'None':
+			data={
+				'status': '400',
+				'data': 'Authentication with social account required '
+			}
+			return Response(status = status.HTTP_400_BAD_REQUEST, data=data)
 		onto_current_user_friends = onto_current.get_friends_name()
 		# Checking if the received bluetooth is already friend with the current user
 		if parsing_to_str(onto_received_user.has_name) in onto_current_user_friends:
@@ -95,7 +108,7 @@ class SearchFriendByBluetooth(APIView):
 
 		# Comapring both friend list and finding mutual friends
 		mutual = set(onto_current_user_friends) & set(onto_received_user_friends)
-		# No mutual friend found
+		# Checking if No mutual friend found
 		if not mutual:
 			data = {
 				'status':'204',
@@ -125,10 +138,10 @@ class OwlReadyOntology (APIView):
 		onto= OntologyManager(user)
 		if repr(onto) == 'None':
 			data={
-				'status': status.HTTP_204_NO_CONTENT,
+				'status': '400',
 				'data': 'Authentication with social account required '
 			}
-			return Response(status = status.HTTP_204_NO_CONTENT, data=data)
+			return Response(status = status.HTTP_400_BAD_REQUEST, data=data)
 		onto_friendlist = onto.get_friends_name()
 
 		return Response (status=status.HTTP_200_OK, data= onto_friendlist)
