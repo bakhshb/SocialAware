@@ -15,7 +15,7 @@ import json
 logger = logging.getLogger(__name__)
 
 #send User Bluetooth to save it to ontology
-# curl -X POST  -H "Content-Type: application/json" -H 'Authorization: Token f386ccc6c18ffe7863cd705340c3f138967033f3' -d "{'bluetooth':''}" http://localhost:8000/api/bluetooth/user/
+# curl -X POST  -H "Content-Type: application/json" -H 'Authorization: Token d930a6d3e0fa7698eeeb956c0ea0ac047bc76d2d' -d "{'bluetooth':''}" http://localhost:8000/api/bluetooth/user/
 # Path http://localhost:8000/api/bluetooth/user/
 class UserBluetooth(APIView):
 	permission_classes = (IsAuthenticated,)
@@ -30,8 +30,8 @@ class UserBluetooth(APIView):
 		if not user_bluetooth:
 			logger.info("User Bluetooth is empty")
 			return Response(status = status.HTTP_400_BAD_REQUEST, data={'status': status.HTTP_400_BAD_REQUEST})
-
-		user = request.user
+		original_request = request._request
+		user = original_request.user
 		onto = OntologyManager(user)
 		if repr(onto) == 'None':
 			data={
@@ -47,7 +47,7 @@ class UserBluetooth(APIView):
 		return Response(status = status.HTTP_200_OK,data={'status':status.HTTP_200_OK })
 
 #receive Bluetooth to check for mutual friends 
-# curl -X POST  -H "Content-Type: application/json" -H 'Authorization: Token f386ccc6c18ffe7863cd705340c3f138967033f3' -d "{'bluetooth':''}" http://localhost:8000/api/bluetooth/search/
+# curl -X POST  -H "Content-Type: application/json" -H 'Authorization: Token d930a6d3e0fa7698eeeb956c0ea0ac047bc76d2d' -d "{'bluetooth':''}" http://localhost:8000/api/bluetooth/search/
 # Path http://localhost:8000/api/bluetooth/search/
 class SearchFriendByBluetooth(APIView):
 	permission_classes = (IsAuthenticated,)
@@ -84,7 +84,8 @@ class SearchFriendByBluetooth(APIView):
 		onto_received_user_friends = onto_received.get_friends_name()
 
 		# Getting the current user detail from ontology
-		user = request.user
+		original_request = request._request
+		user = original_request.user
 		onto_current = OntologyManager(user)
 		# Checking if user is logged in with social account
 		if repr(onto_current) == 'None':
@@ -133,7 +134,8 @@ class OwlReadyOntology (APIView):
 	permission_classes = (IsAuthenticated,)
 
 	def get (self, request, format=None):
-		user = request.user
+		original_request = request._request
+		user = original_request.user
 		onto_friendlist=[]
 		onto= OntologyManager(user)
 		if repr(onto) == 'None':
