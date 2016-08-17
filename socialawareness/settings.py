@@ -23,9 +23,9 @@ ONTOLOGY_IRI = 'http://aut.ac.nz/xgc4811/ontology/facebook.owl'
 SECRET_KEY = 'kc@8ftw83q-vhil)w6vhp9jyy(22cex8f*==%4+u_b*0g3_)6&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -89,8 +89,12 @@ WSGI_APPLICATION = 'socialawareness.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'db07f6kbtg888n',
+        'USER': 'yzllpkqdsnsbfj',
+        'PASSWORD': '-sfbuZW458XKjwOCcd7TzM3XU3',
+        'HOST': 'ec2-54-243-201-144.compute-1.amazonaws.com',
+        'PORT': '5432',
     }
 }
 
@@ -128,13 +132,17 @@ USE_L10N = True
 USE_TZ = True
 
 
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
-
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+
+# Extra places for collectstatic to find static files.
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
 
 #Loggin Errors
 
