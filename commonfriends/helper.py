@@ -173,4 +173,4 @@ class OntologyManager (object):
 		return self.user
 
 	def save_ontology(self):
-		ONTO.save('facebook.owl')
+		ONTO.save()
