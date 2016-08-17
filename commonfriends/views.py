@@ -87,13 +87,7 @@ class SearchFriendByBluetooth(APIView):
 		original_request = request._request
 		user = original_request.user
 		onto_current = OntologyManager(user)
-		# Checking if user is logged in with social account
-		if repr(onto_current) == 'None':
-			data={
-				'status': '400',
-				'data': 'Authentication with social account required '
-			}
-			return Response(status = status.HTTP_400_BAD_REQUEST, data=data)
+		
 		onto_current_user_friends = onto_current.get_friends_name()
 		# Checking if the received bluetooth is already friend with the current user
 		if parsing_to_str(onto_received_user.has_name) in onto_current_user_friends:
