@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 # load ontology
 logger.info("Loading Facebook.owl Ontology")
 onto_path.append (BASE_DIR)
+logger.error(BASE_DIR)
 ONTO = Ontology(ONTOLOGY_IRI).load()
 
 
