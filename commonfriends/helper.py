@@ -115,6 +115,7 @@ class OntologyManager (object):
         ONTO.add ((self.user, SC.facebookID, Literal(kwargs['id'])))
         ONTO.add ((self.user, SC.imageURL, Literal(kwargs['url'])))
         ONTO.serialize("socialContext.owl", format="pretty-xml")
+        logger.info("User is added successfully ")
 
     def get_username (self):
         qres = ONTO.query(
@@ -137,6 +138,7 @@ class OntologyManager (object):
             ONTO.add ((friend, SC.isFriendOf, self.user))
             ONTO.add ((self.user, SC.isFriendOf, friend))
             ONTO.serialize("socialContext.owl", format="pretty-xml")
+            logger.info("Friend is added successfully ")
         else:
             raise ValueError ("Cannot add friends because user is not found")
 
@@ -166,6 +168,7 @@ class OntologyManager (object):
             for b in ONTO.objects (self.user, FOAF.name):
                 ONTO.set((self.user,SC.bluetoothID, Literal(bluetooth)))
                 ONTO.serialize("socialContext.owl", format="pretty-xml")
+                logger.info("Bluetooth is added successfully ")
         else:
             raise ValueError ("Cannot create bluetooth because user is not found")
             
@@ -180,14 +183,13 @@ class OntologyManager (object):
                }""",initNs = {"sc": "http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#"}, initBindings = {"bluetooth": bluetooth})
 
         for row in qres:
-            self.user = URIRef("%s"%row)
-        return self.user
+            user = URIRef("%s"%row)
+        return user
     
 ##        Get user by bluetooth ID using python code
 ##        for user in ONTO.subjects(SC.bluetoothID):
 ##            for onto_bluetooth in ONTO.objects (user, SC.bluetoothID):
 ##                if bluetooth in onto_bluetooth:
-##                    self.user=user
 ##                    return user
 
     # Getting common firends using python code                
@@ -204,7 +206,7 @@ class OntologyManager (object):
             common_friends = set(onto_friendlist1) & set(onto_friendlist2)
             return common_friends
         else:
-            print ("Could not find such user in the dataset")
+            print ("Could not find such a user in the dataset")
 
     # Getting common friends using SPARQL
     def get_common_friends_sec (self, user_uri= None, bluetooth = None):
@@ -213,15 +215,15 @@ class OntologyManager (object):
             user_uri = self.get_user_by_bluetooth(bluetooth)
         if (user_uri is not None and self.user is not None):
             qres = ONTO.query(
-                """SELECT ?p
+                """SELECT ?name
                    WHERE {
                       ?person1 sc:isFriendOf ?friend. 
-                      ?person2 ^sc:isFriendOf ?p, ?friend.
-                      FILTER (?p != ?friend) 
+                      ?person2 sc:isFriendOf ?friend.
+                      ?friend foaf:name ?name
                    }""",initNs = { "foaf": FOAF , "sc": "http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#"}, initBindings = {"person1": self.user, "person2":user_uri})
 
             for row in qres:
             	common_friends.append("%s"%row)                    
             return qres
         else:
-            print ("Could not find such user in the dataset")
+            print ("Could not find such a user in the dataset")

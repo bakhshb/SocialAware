@@ -83,10 +83,10 @@ class SearchFriendByBluetooth(APIView):
 		onto_user2 = OntologyManager()
 		bluetooth_user2 = onto_user2.get_user_by_bluetooth (bluetooth)
 		data = {
-		'status':'200',
-		'user': onto_user2.get_username(),
-		'friend_status': FOUND_MUTUAL_FRIENDS,
-		'friend': mutual,
+			'status':'200',
+			'user': onto_user2.get_username(),
+			'friend_status': FOUND_MUTUAL_FRIENDS,
+			'friend': mutual,
 		}
 		return Response(status = status.HTTP_200_OK,data=data)
 
