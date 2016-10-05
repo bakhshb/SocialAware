@@ -5,7 +5,7 @@ from django.db import models
 from django.dispatch import receiver
 # allauth
 from allauth.account.signals import user_logged_in, user_signed_up
-from .helper import ONTO, parsing_to_str, OntologyManager , FacebookManager
+from .helper import ONTO, OntologyManager , FacebookManager
 import logging
 
 
@@ -21,15 +21,16 @@ def user_signed_up(request, user, sociallogin=False, **kwargs):
 		# get user detail from facebook
 		fb = FacebookManager(user)
 		fb_user = fb.get_user_detail()
-
 		logger.info("Signing up new user in ontology")
 		# Create a new user in ontology user
 		# OntologyManager class should have no parameter 
 		onto = OntologyManager()
-		onto.create_user(user= user.get_full_name(),name=fb_user['name'],
+		onto.add_user(email= fb_user['email'],name=fb_user['name'], first_name= user.first_name, last_name= user.last_name,
 			id=fb_user['id'],
 			gender=fb_user['gender'],
 			url=fb_user['picture']['data']['url'])
+		
+
 
 
 # Listen to loggin and check if facebook friend has been changed
@@ -42,17 +43,11 @@ def user_logged_in(request, user, sociallogin=None, **kwargs):
 		fb_friendlist = fb.get_user_friends()
 
 		logger.info("Getting the current user detail from ontology")
-		onto = OntologyManager(user)
-		onto_friendlist= onto.get_friends_name()
+		onto = OntologyManager(user.email)
+		onto_friendlist= onto.get_friends()
 
 		logger.info("Comparing between ontology friends and facebook friends")
-		save_to_ontology = False
 		for friend in fb_friendlist:
 			if not friend['name'] in onto_friendlist:
 				logger.info("Adding new a friend")
-				save_to_ontology=True
-				onto.create_friend(name=friend['name'],id=friend['id'], url=friend['url'])
-			
-		if save_to_ontology:
-			logger.info("updating ontology")
-			onto.save_ontology()
+				onto.add_friend(name=friend['name'],id=friend['id'], url=friend['url'])

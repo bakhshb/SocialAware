@@ -3,10 +3,12 @@ from allauth.socialaccount.models import SocialToken, SocialApp, SocialLogin
 # Facepy a plugin for Facebook
 from facepy import GraphAPI
 import requests
-# Owlready
-from owlready import *
+# REDFLIB 
+import rdflib
+from rdflib import Namespace, Literal, RDFS, URIRef, BNode
+from rdflib.namespace import RDF, FOAF
 # get setting detail
-from socialawareness.settings import BASE_DIR, ONTOLOGY_IRI
+from socialawareness.settings import BASE_DIR
 import logging
 
 
@@ -15,14 +17,15 @@ logger = logging.getLogger(__name__)
 
 
 # load ontology
-logger.info("Loading Facebook.owl Ontology")
-onto_path.append (BASE_DIR)
-ONTO = Ontology(ONTOLOGY_IRI).load()
-
+logger.info("Loading Ontology")
+ONTO=rdflib.Graph()
+ONTO.load(BASE_DIR+'/socialContext.owl')
+#PREFIX SC = Social Context
+SC = Namespace("http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#") 
 
 # Persing the ontology data
 parsing_to_str = lambda args: str(args).replace("['",'').replace("']",'') 
-remove_space = lambda args: str(args).replace(" ", "_") 
+remove_space = lambda args: str(args).replace(" ", "_").lower()
 
 # Managing Facebook
 class FacebookManager (object):
@@ -48,7 +51,7 @@ class FacebookManager (object):
 		if self.social_access_token != None:
 			graph = GraphAPI(self.social_access_token)
 			# Get Frineds
-			me= graph.get('me?fields=id,name,gender,picture')
+			me= graph.get('me?fields=id,name,gender,picture,email,hometown,location,birthday')
 			return me
 
 	def get_user_friends(self):
@@ -77,99 +80,148 @@ class FacebookManager (object):
 
 # Managing ontology
 class OntologyManager (object):
-	def __init__ (self, user=None):
-		logger.info("Ontology Manager Started")
-		global ONTO
-		global ONTOLOGY_IRI
-		self.user = None
-		if user is not None:
-			try:
-				onto_user_object = ONTO.get_object(ONTOLOGY_IRI+"#%s"%remove_space(user.get_full_name()))
-				if onto_user_object in ONTO.User.instances():
-					self.user = onto_user_object
-			except ValueError:
-				logger.error("The user does not exist in the ontology because authentication with social account required")
 
-	def __repr__(self):
-		return repr(self.user)
-		
-	def get_user (self):
-		if self.user is not None:
-			return self.user
-		else:
-			raise ValueError ("user has not been created")
-			logger.error("user has not been created")
+    def __init__(self, user=None):
+        #logger.info("Ontology Manager Started")
+        global ONTO
+        global SC
+        self.user = None
+        if user is not None:
+            try:
+                email = URIRef("http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#%s"%str(user).lower())
+                qres = ONTO.query(
+                    """SELECT ?person
+                       WHERE {
+                          ?person foaf:mbox ?email.
+                       }""",initNs = { "foaf": FOAF}, initBindings = {"email": email})
 
-	def get_friends (self):
-		if self.user is not None:
-			onto_friendlist=[]
-			for onto_friend in self.user.has_friend:
-				onto_friendlist.append(dict(friend=parsing_to_str(onto_friend.has_name),
-					picture=parsing_to_str(onto_friend.has_picture)))
-			return onto_friendlist
-		else:
-			raise ValueError ("Cannot get friends because user is not found")
-			logger.error("Cannot get friends because user is not found")
+                for row in qres:
+                    self.user = URIRef("%s"%row)
+##                for onto_user in ONTO.subjects(FOAF.name):
+##                    if remove_space(user) in onto_user:
+##                        self.user = onto_user
+            except ValueError:
+                print("The user does not exist in the ontology because authentication with social account required")
 
 
-	def get_friends_name (self):
-		if self.user is not None:
-			onto_friendlist=[]
-			for onto_friend in self.user.has_friend:
-				onto_friendlist.append(parsing_to_str(onto_friend.has_name))
-			return onto_friendlist
-		else:
-			raise ValueError ("Cannot get friends because user is not found")
-			logger.error("Cannot get friends because user is not found")
+    def add_user (self,**kwargs):
+        self.user = URIRef("http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#%s"%str(kwargs['email']).lower())
+        ONTO.add ((self.user, RDF.type, FOAF.Person))
+        ONTO.add ((self.user, FOAF.name, Literal(kwargs['name'])))
+        ONTO.add ((self.user, FOAF.firstName, Literal(kwargs['first_name'])))
+        ONTO.add ((self.user, FOAF.lastName, Literal(kwargs['last_name'])))
+        ONTO.add ((self.user, FOAF.gender, Literal(kwargs['gender'])))
+        ONTO.add ((self.user, FOAF.mbox, self.user))
+        ONTO.add ((self.user, SC.facebookID, Literal(kwargs['id'])))
+        ONTO.add ((self.user, SC.imageURL, Literal(kwargs['url'])))
+        ONTO.serialize("socialContext.owl", format="pretty-xml")
 
-	def create_user (self, **kwargs):
-		if self.user is None:
-			if not remove_space(kwargs['user']) in ONTO.User.instances():
-				self.user = ONTO.User(remove_space(kwargs['user']))
-				self.user.has_name.append(kwargs['name'])
-				self.user.has_id.append(kwargs['id'])
-				self.user.has_gender= [kwargs['gender']]
-				self.user.has_picture.append(kwargs['url'])
-			else:
-				raise ValueError ("User already exists")
-				logger.error("User already exists")
-		else:
-			raise ValueError ("Cannot create user because user already exists")
-			logger.error("Cannot create user because user already exists")
+    def get_username (self):
+        qres = ONTO.query(
+            """SELECT ?name
+               WHERE {
+                  ?person foaf:name ?name.
+               }""",initNs = { "foaf": FOAF}, initBindings = {"person": self.user})
 
-	def create_friend (self,**kwargs):
-		if self.user is not None:
-			friend = ONTO.Friend(remove_space(kwargs['name']))
-			friend.has_name.append(kwargs['name'])
-			friend.has_id.append(kwargs['id'])
-			friend.has_picture.append(kwargs['url'])
-			self.user.has_friend.append(friend)
-		else:
-			raise ValueError ("Cannot create friend because user is not found")
-			logger.error("Cannot create friend because user is not found")
+        for row in qres:
+            name = str ("%s"%row)
+        return name
 
-	def delete_instances (self,instance):
-		ONTO.instances.remove(instance)
+    def add_friend (self,**kwargs):
+        if self.user is not None:
+            friend = URIRef("http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#%s"%remove_space(kwargs['name']))
+            ONTO.add ((friend, RDF.type, SC['FriendList']))
+            ONTO.add ((friend, FOAF.name, Literal(kwargs['name'])))
+            ONTO.add ((friend, SC.facebookID, Literal(kwargs['id'])))
+            ONTO.add ((friend, SC.imageURL, Literal(kwargs['url'])))
+            ONTO.add ((friend, SC.isFriendOf, self.user))
+            ONTO.add ((self.user, SC.isFriendOf, friend))
+            ONTO.serialize("socialContext.owl", format="pretty-xml")
+        else:
+            raise ValueError ("Cannot add friends because user is not found")
 
-	def create_bluetooth(self, bluetooth):
-		if self.user is not None:
-			current_bluetooth = self.user.has_bluetooth
-			if not current_bluetooth:
-				# if there is no bluetooth create bluetooth
-				self.user.has_bluetooth.append(bluetooth)
-			else:
-				# remove current bluetooth, then create new bluetooth
-				self.user.has_bluetooth.remove(parsing_to_str(current_bluetooth))
-				self.user.has_bluetooth.append(bluetooth)
-		else:
-			raise ValueError ("Cannot create bluetooth because user is not found")
-			logger.error("Cannot create bluetooth because user is not found")
+    def get_friends (self):
+        onto_friendlist = []
+        if self.user is not None:
+            # Get friends using SPARQL
+            qres = ONTO.query(
+                """SELECT ?name
+                   WHERE {
+                      ?person1 sc:isFriendOf ?friend.
+                      ?friend foaf:name ?name.
+                   }""",initNs = { "foaf": FOAF , "sc": "http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#"}, initBindings = {"person1": self.user})
+            for row in qres:
+                onto_friendlist.append("%s"%row)
+            return onto_friendlist
+##            Get friends using python code
+##            for d in ONTO.objects(self.user, SC.isFriendOf):
+##                for a in ONTO.objects(d,FOAF.name):
+##                    onto_friendlist.append(a)
+##            return onto_friendlist
+        else:
+            raise ValueError ("Cannot get friends because user is not found")
 
-	def get_user_by_bluetooth (self, bluetooth):
-		for onto_user in ONTO.User.instances():
-			if parsing_to_str(onto_user.has_bluetooth) == bluetooth:
-				self.user = onto_user
-		return self.user
+    def add_bluetooth(self, bluetooth):
+        if self.user is not None:
+            for b in ONTO.objects (self.user, FOAF.name):
+                ONTO.set((self.user,SC.bluetoothID, Literal(bluetooth)))
+                ONTO.serialize("socialContext.owl", format="pretty-xml")
+        else:
+            raise ValueError ("Cannot create bluetooth because user is not found")
+            
+   
+    def get_user_by_bluetooth (self, bluetooth):
+        # Get user by bluetooth ID using SPARQL
+        bluetooth = Literal(bluetooth)
+        qres = ONTO.query(
+            """SELECT ?person
+               WHERE {
+                  ?person sc:bluetoothID ?bluetooth.
+               }""",initNs = {"sc": "http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#"}, initBindings = {"bluetooth": bluetooth})
 
-	def save_ontology(self):
-		ONTO.save('facebook.owl')
+        for row in qres:
+            self.user = URIRef("%s"%row)
+        return self.user
+    
+##        Get user by bluetooth ID using python code
+##        for user in ONTO.subjects(SC.bluetoothID):
+##            for onto_bluetooth in ONTO.objects (user, SC.bluetoothID):
+##                if bluetooth in onto_bluetooth:
+##                    self.user=user
+##                    return user
+
+    # Getting common firends using python code                
+    def get_common_friends (self, user_uri = None, bluetooth = None):
+        onto_friendlist1 = self.get_friends()
+        onto_friendlist2 = []
+        if bluetooth is not None:
+            user_uri = self.get_user_by_bluetooth(bluetooth)
+            
+        if user_uri is not None:                
+            for onto_friend in ONTO.objects (user_uri, SC.isFriendOf):
+                for onto_friend_name in ONTO.objects (onto_friend, FOAF.name):
+                    onto_friendlist2.append("%s"%onto_friend_name)
+            common_friends = set(onto_friendlist1) & set(onto_friendlist2)
+            return common_friends
+        else:
+            print ("Could not find such user in the dataset")
+
+    # Getting common friends using SPARQL
+    def get_common_friends_sec (self, user_uri= None, bluetooth = None):
+        common_friends = []
+        if bluetooth is not None:
+            user_uri = self.get_user_by_bluetooth(bluetooth)
+        if (user_uri is not None and self.user is not None):
+            qres = ONTO.query(
+                """SELECT ?p
+                   WHERE {
+                      ?person1 sc:isFriendOf ?friend. 
+                      ?person2 ^sc:isFriendOf ?p, ?friend.
+                      FILTER (?p != ?friend) 
+                   }""",initNs = { "foaf": FOAF , "sc": "http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#"}, initBindings = {"person1": self.user, "person2":user_uri})
+
+            for row in qres:
+            	common_friends.append("%s"%row)                    
+            return qres
+        else:
+            print ("Could not find such user in the dataset")
