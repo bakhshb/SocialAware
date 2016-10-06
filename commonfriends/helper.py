@@ -117,12 +117,12 @@ class OntologyManager (object):
         ONTO.serialize("socialContext.owl", format="pretty-xml")
         logger.info("User is added successfully ")
 
-    def get_username (self):
+    def get_name (self, user):
         qres = ONTO.query(
             """SELECT ?name
                WHERE {
                   ?person foaf:name ?name.
-               }""",initNs = { "foaf": FOAF}, initBindings = {"person": self.user})
+               }""",initNs = { "foaf": FOAF}, initBindings = {"person": user})
 
         for row in qres:
             name = str ("%s"%row)
@@ -176,6 +176,7 @@ class OntologyManager (object):
     def get_user_by_bluetooth (self, bluetooth):
         # Get user by bluetooth ID using SPARQL
         bluetooth = Literal(bluetooth)
+        user = None
         qres = ONTO.query(
             """SELECT ?person
                WHERE {
@@ -224,6 +225,6 @@ class OntologyManager (object):
 
             for row in qres:
             	common_friends.append("%s"%row)                    
-            return qres
+            return common_friends
         else:
             print ("Could not find such a user in the dataset")
