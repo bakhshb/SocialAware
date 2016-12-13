@@ -228,3 +228,24 @@ class OntologyManager (object):
             return common_friends
         else:
             print ("Could not find such a user in the dataset")
+
+    # Check if the users are already friends
+    def check_already_friends (self, user_uri= None, bluetooth = None ):
+        print (user_uri)
+        if bluetooth is not None:
+            user_uri = self.get_user_by_bluetooth(bluetooth)
+
+        if (user_uri is not None and self.user is not None):
+            qres = ONTO.query(
+                """SELECT ?name
+                   WHERE {
+                      ?person2 foaf:name ?name.
+                      ?person1 sc:isFriendOf ?friend.
+                      ?friend foaf:name ?name.
+                   } 
+                   """,initNs = { "foaf": FOAF , "sc": "http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#"}, initBindings = {"person1": self.user, "person2":user_uri})
+
+            for row in qres:
+                return "%s"%row
+        else:
+            print ("Could not find such user in the dataset")
