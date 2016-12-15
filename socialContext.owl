@@ -83,7 +83,6 @@
     <!-- http://xmlns.com/foaf/0.1/mbox -->
 
     <owl:ObjectProperty rdf:about="http://xmlns.com/foaf/0.1/mbox">
-        <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Organization"/>
         <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
         <rdfs:range rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
         <rdfs:comment>personal mailbox - A personal mailbox, ie. an Internet mailbox associated with exactly one owner, the first owner of this mailbox. This is a &apos;static inverse functional property&apos;, in that there is (across time and change) at most one individual that ever has any particular value for foaf:mbox. 
@@ -136,7 +135,6 @@ It is import it from foaf ontology</rdfs:comment>
 
     <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#imageURL">
         <rdfs:domain rdf:resource="http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#People"/>
-        <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Organization"/>
         <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
         <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
         <rdfs:comment>URL Image of something</rdfs:comment>
@@ -171,7 +169,6 @@ It is import it from foaf ontology</rdfs:comment>
     <!-- http://xmlns.com/foaf/0.1/age -->
 
     <owl:DatatypeProperty rdf:about="http://xmlns.com/foaf/0.1/age">
-        <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Organization"/>
         <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
         <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
         <rdfs:comment>The age in years of something.</rdfs:comment>
@@ -182,7 +179,6 @@ It is import it from foaf ontology</rdfs:comment>
     <!-- http://xmlns.com/foaf/0.1/birthday -->
 
     <owl:DatatypeProperty rdf:about="http://xmlns.com/foaf/0.1/birthday">
-        <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Organization"/>
         <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
         <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
         <rdfs:comment>The birthday of this Person, represented in mm-dd string form, eg. &apos;12-31&apos;.</rdfs:comment>
@@ -250,7 +246,6 @@ It is import it from foaf ontology</rdfs:comment>
         <rdfs:domain rdf:resource="http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#Connection"/>
         <rdfs:domain rdf:resource="http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#Following-Follower"/>
         <rdfs:domain rdf:resource="http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#FriendList"/>
-        <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Organization"/>
         <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
         <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
         <rdfs:comment>A name of something</rdfs:comment>
@@ -261,7 +256,6 @@ It is import it from foaf ontology</rdfs:comment>
     <!-- http://xmlns.com/foaf/0.1/status -->
 
     <owl:DatatypeProperty rdf:about="http://xmlns.com/foaf/0.1/status">
-        <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Organization"/>
         <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
         <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
         <rdfs:comment>A string expressing what the user is happy for the general public (normally) to know about their current activity.</rdfs:comment>
@@ -325,13 +319,6 @@ It is import it from foaf ontology</rdfs:comment>
     <owl:Class rdf:about="http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#FriendList">
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#isFriendOf"/>
-                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
-                <owl:onClass rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
-            </owl:Restriction>
-        </owl:equivalentClass>
-        <owl:equivalentClass>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#facebookID"/>
                 <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
             </owl:Restriction>
@@ -368,12 +355,6 @@ It is import it from foaf ontology</rdfs:comment>
     <!-- http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#SocialContext -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/xgc4811/ontologies/2016/9/socialContext#SocialContext"/>
-    
-
-
-    <!-- http://xmlns.com/foaf/0.1/Organization -->
-
-    <owl:Class rdf:about="http://xmlns.com/foaf/0.1/Organization"/>
     
 
 
