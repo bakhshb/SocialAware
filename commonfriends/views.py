@@ -81,12 +81,12 @@ class SearchFriendByBluetooth(APIView):
 
 			if already_friends:
 				data = {
-			 		'status':'200',
-			 		'user': already_friends,
-			 		'friend_status': USER_ALREADY_FRIEND,
-			 		'friend': [],
-			 	}
-			 	return Response(status = status.HTTP_200_OK,data=data)
+				'status':'200',
+				'user': already_friends,
+				'friend_status': USER_ALREADY_FRIEND,
+				'friend': [],
+				}
+				return Response(status = status.HTTP_200_OK,data=data)
 
 
 			# Checking if No mutual friend found
@@ -118,57 +118,6 @@ class SearchFriendByBluetooth(APIView):
 					'friend': [],
 			}
 			return Response(status = status.HTTP_204_NO_CONTENT, data= data)
-
-
-		# # Finding the user by bluetooth address in the ontology
-		# onto_received = OntologyManager()
-		# onto_received_user = onto_received.get_user_by_bluetooth(bluetooth)
-		# if onto_received_user is None:
-		# 	logger.debug("No Match Found")
-		# 	data = {
-		# 		'status':'400',
-		# 		'friend_status': NO_MATCH_FOUND,
-		# 		'friend': [],
-		# 	}
-		# 	return Response(status = status.HTTP_400_BAD_REQUEST, data= data)
-		# # if user is found, then get user friend list
-		# onto_received_user_friends = onto_received.get_friends_name()
-
-		# # Getting the current user detail from ontology
-		# original_request = request._request
-		# user = original_request.user
-		# onto_current = OntologyManager(user)
-		# onto_current_user_friends = onto_current.get_friends_name()
-		# # Checking if the received bluetooth is already friend with the current user
-		# if parsing_to_str(onto_received_user.has_name) in onto_current_user_friends:
-		# 	logger.info("User is already your friend")
-		# 	data = {
-		# 		'status':'200',
-		# 		'user': parsing_to_str(onto_received_user.has_name),
-		# 		'friend_status': USER_ALREADY_FRIEND,
-		# 		'friend': [],
-		# 	}
-		# 	return Response(status = status.HTTP_200_OK,data=data)
-
-
-		# # Comapring both friend list and finding mutual friends
-		# mutual = set(onto_current_user_friends) & set(onto_received_user_friends)
-		# # Checking if No mutual friend found
-		# if not mutual:
-		# 	data = {
-		# 		'status':'204',
-		# 		'friend_status': NO_MATCH_FOUND,
-		# 		'friend': [],
-		# 	}
-		# 	return Response(status = status.HTTP_204_NO_CONTENT, data= data)
-
-		# data = {
-		# 'status':'200',
-		# 'user': parsing_to_str(onto_received_user.has_name),
-		# 'friend_status': FOUND_MUTUAL_FRIENDS,
-		# 'friend': mutual,
-		# }
-		# return Response(status = status.HTTP_200_OK,data=data)
 
 
 
